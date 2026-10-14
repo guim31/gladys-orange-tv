@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-14
+
 ### Added
 
 - One Gladys device per Orange TV decoder (UHD 86, TV 4, TV 5, TV 6; up to
@@ -26,4 +28,5 @@ the notes of the version's GitHub Release.
 - "Test the decoders" in the Configuration screen.
 - Texts and documentation in English, French, German and Spanish.
 
-[Unreleased]: https://github.com/guim31/gladys-orange-tv/commits/main
+[Unreleased]: https://github.com/guim31/gladys-orange-tv/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/guim31/gladys-orange-tv/releases/tag/v1.0.0
