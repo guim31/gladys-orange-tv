@@ -81,7 +81,7 @@ the number.
   passed on: decoder name, how (`standby` or `unreachable`).
 - **Channel changed**: the decoder switched to another live channel (filter on a channel number,
   empty: any). Information passed on: decoder name, channel number and name, previous channel number
-  and name. Going through the home page and back to the same channel is not a change.
+  and name. Going through the home page and back to the same channel is not a change; the first channel seen after a start of the integration on the home page or in standby is one, without previous channel.
 
 The events fire even for a decoder not added in Gladys.
 

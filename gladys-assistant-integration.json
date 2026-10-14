@@ -369,10 +369,10 @@
             "es": "Decodificador"
           },
           "description": {
-            "en": "Empty: the first decoder of the configuration.",
-            "fr": "Vide : le premier décodeur de la configuration.",
-            "de": "Leer: der erste Decoder der Konfiguration.",
-            "es": "Vacío: el primer decodificador de la configuración."
+            "en": "Empty: any decoder.",
+            "fr": "Vide : n'importe quel décodeur.",
+            "de": "Leer: jeder Decoder.",
+            "es": "Vacío: cualquier decodificador."
           },
           "required": false
         }
@@ -436,10 +436,10 @@
             "es": "Decodificador"
           },
           "description": {
-            "en": "Empty: the first decoder of the configuration.",
-            "fr": "Vide : le premier décodeur de la configuration.",
-            "de": "Leer: der erste Decoder der Konfiguration.",
-            "es": "Vacío: el primer decodificador de la configuración."
+            "en": "Empty: any decoder.",
+            "fr": "Vide : n'importe quel décodeur.",
+            "de": "Leer: jeder Decoder.",
+            "es": "Vacío: cualquier decodificador."
           },
           "required": false
         },
@@ -523,10 +523,10 @@
             "es": "Decodificador"
           },
           "description": {
-            "en": "Empty: the first decoder of the configuration.",
-            "fr": "Vide : le premier décodeur de la configuration.",
-            "de": "Leer: der erste Decoder der Konfiguration.",
-            "es": "Vacío: el primer decodificador de la configuración."
+            "en": "Empty: any decoder.",
+            "fr": "Vide : n'importe quel décodeur.",
+            "de": "Leer: jeder Decoder.",
+            "es": "Vacío: cualquier decodificador."
           },
           "required": false
         },
@@ -689,7 +689,7 @@
       "label": {
         "en": "Put on a channel",
         "fr": "Mettre une chaîne",
-        "de": "Sender einschalten",
+        "de": "Sender wählen",
         "es": "Poner un canal"
       },
       "description": {

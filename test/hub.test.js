@@ -108,13 +108,19 @@ test('turned on, channel changed, turned off: one event per transition', async (
     channel: 6,
     channel_name: 'M6',
   });
-  assert.equal(events(w, TRIGGERS.CHANNEL_CHANGED).length, 0);
+  // No channel seen since the start: the first one is a change, without previous one.
+  assert.deepEqual(
+    events(w, TRIGGERS.CHANNEL_CHANGED).map((event) => event.data.previous_channel),
+    [null],
+  );
 
   w.decoder.epgId = '111';
   await w.hub.pollAll();
   await w.hub.pollAll();
   assert.deepEqual(
-    events(w, TRIGGERS.CHANNEL_CHANGED).map((event) => event.data),
+    events(w, TRIGGERS.CHANNEL_CHANGED)
+      .slice(1)
+      .map((event) => event.data),
     [
       {
         device: deviceId(w.gladys),
@@ -132,7 +138,7 @@ test('turned on, channel changed, turned off: one event per transition', async (
   await w.hub.pollAll();
   w.decoder.epgId = '111';
   await w.hub.pollAll();
-  assert.equal(events(w, TRIGGERS.CHANNEL_CHANGED).length, 1);
+  assert.equal(events(w, TRIGGERS.CHANNEL_CHANGED).length, 2);
 
   w.decoder.on = false;
   await w.hub.pollAll();
@@ -314,4 +320,64 @@ test('the container reads the decoders on its own timer, without onPoll', async 
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(reads(), 2);
   assert.equal(state({ ...w }, FEATURE_KEYS.CHANNEL_NAME), 'France 2');
+});
+
+test('two quick "standby" commands press the toggle once, even with a reading in flight', async (t) => {
+  const w = await world(t);
+  // Slow answers: a timer reading starts before the first press and ends after it.
+  const client = w.hub.records.get(1).client;
+  const request = client.request;
+  client.request = async (url, options) => {
+    const answer = await request(url, options);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    return answer;
+  };
+  const reading = w.hub.pollAll();
+  const results = await Promise.all([w.hub.setPower(null, false), w.hub.setPower(null, false)]);
+  await reading;
+  assert.deepEqual(results, [true, false]);
+  assert.deepEqual(w.decoder.keys, [116]);
+  assert.equal(w.decoder.on, false);
+});
+
+test('the requested power state is trusted while the decoder still reports the old one', async (t) => {
+  const w = await world(t);
+  await w.hub.setPower(null, false);
+  w.decoder.on = true; // a decoder slow to apply the key
+  assert.equal(await w.hub.setPower(null, false), false);
+  assert.deepEqual(w.decoder.keys, [116]);
+});
+
+test('a refused discovery does not stop the readings', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const w = await createWorld({ connect: false, timers: true });
+  t.after(() => w.app.stop());
+  w.gladys.publishDiscoveredDevices = async () => {
+    throw new Error('HTTP 500');
+  };
+  await w.gladys.connect();
+  await w.app.ready;
+  const decoder = decoderOf(w);
+  assert.equal(decoder.requests.length, 1);
+  t.mock.timers.tick(10_000);
+  await new Promise((resolve) => setImmediate(resolve));
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(decoder.requests.length, 2);
+});
+
+test('a decoder silent for days still offers its states (12 h heartbeat)', async (t) => {
+  const w = await world(t);
+  w.decoder.online = false;
+  await w.hub.pollAll();
+  await w.hub.pollAll();
+  const calls = [];
+  w.gladys.publishChangedStates = async (states, options) => {
+    calls.push({ states, options });
+    return { success: true, count: 0 };
+  };
+  await w.hub.pollAll();
+  await w.hub.pollAll();
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].options.heartbeat, 12 * 60 * 60_000);
+  assert.ok(calls[0].states.some((state) => state.state === 0));
 });

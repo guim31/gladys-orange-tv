@@ -103,6 +103,14 @@ test('favorites: a tap types the channel, turning the decoder on first', async (
   assert.equal(ack.success, true, ack.error);
   assert.deepEqual(w.decoder.keys, [116, 513, 518]);
   assert.equal(ack.data.message.en, 'Channel 16 · franceinfo.');
+
+  const unknown = await w.fake.widgetAction('favorites', 'channel_4', { number: 42 }, {});
+  assert.deepEqual(unknown.data.message, {
+    en: 'Channel 42.',
+    fr: 'Chaîne 42.',
+    de: 'Sender 42.',
+    es: 'Canal 42.',
+  });
 });
 
 test('no decoder, or a decoder removed from the configuration: a message', async (t) => {

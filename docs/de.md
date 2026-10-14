@@ -84,7 +84,7 @@ ein und tippt dann die Nummer.
 - **Sender gewechselt**: Der Decoder hat auf einen anderen Live-Sender gewechselt (Filter auf eine
   Sendernummer, leer: jeder). Weitergegebene Informationen: Name des Decoders, Nummer und Name des
   Senders, Nummer und Name des vorherigen Senders. Über die Startseite zum selben Sender zurück ist kein
-  Wechsel.
+  Wechsel; der erste Sender nach einem Start der Integration auf der Startseite oder im Standby ist einer, ohne vorherigen Sender.
 
 Die Ereignisse werden auch für einen Decoder ausgelöst, der nicht in Gladys hinzugefügt wurde.
 
@@ -92,7 +92,7 @@ Die Ereignisse werden auch für einen Decoder ausgelöst, der nicht in Gladys hi
 
 - **Decoder ein- oder ausschalten**: drückt die Ein-Taste nur bei Bedarf. Ausgabe: ob die Taste gedrückt
   wurde.
-- **Sender einschalten**: tippt die Sendernummer auf der Fernbedienung; schaltet den Decoder vorher ein,
+- **Sender wählen**: tippt die Sendernummer auf der Fernbedienung; schaltet den Decoder vorher ein,
   falls er im Standby ist (etwa 6 Sekunden). Ausgaben: Nummer und Name des Senders.
 - **Taste drücken**: OK, zurück, Menü, TV-Programm, Pfeile, Sender, Lautstärke, stumm, Wiedergabe /
   Pause, zurückspulen, vorspulen, aufnehmen, Video auf Abruf, Ein; bis zu 10 Mal (Lautstärkestufen).
@@ -101,7 +101,7 @@ Ohne gewählten Decoder steuern die Aktionen den ersten Decoder der Konfiguratio
 
 ## Szenen-Beispiele
 
-- **Morgennachrichten**: werktags um 7:00 → _Sender einschalten_ 16 (franceinfo).
+- **Morgennachrichten**: werktags um 7:00 → _Sender wählen_ 16 (franceinfo).
 - **Filmabend**: _Decoder eingeschaltet_ nach 20:00 → das Licht im Wohnzimmer dimmen.
 - **Ruhiges Haus**: _Decoder ausgeschaltet_ → nach 5 Minuten die Steckdosenleiste des Fernsehers
   ausschalten.

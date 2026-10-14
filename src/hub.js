@@ -15,6 +15,7 @@
 
 import { DEVICE_TRANSPORTS, createLogger } from '@gladysassistant/integration-sdk';
 import { parseChannelNumber } from './channels.js';
+import { normalizeConfig } from './config.js';
 import { DecoderClient, DecoderError, ERROR_KINDS, KEYS, digitKey } from './decoder/client.js';
 import { describeChannel, parseStatus } from './decoder/model.js';
 import {
@@ -61,6 +62,10 @@ export const HUB_TIMINGS = {
   digitDelayMs: 350,
   // Time a decoder takes to leave standby before it takes a channel number.
   wakeMs: 6000,
+  // After a power press, the state it asked for is trusted this long: the
+  // decoder may still report the old one, and a second "turn off" in that
+  // window must not press the toggle again.
+  powerSettleMs: 8000,
   // Re-publish unchanged values this often (Gladys flags values older than 48 h).
   heartbeatMs: 12 * 60 * 60_000,
 };
@@ -82,7 +87,8 @@ export class DecoderHub {
     this.timersEnabled = timers;
     this.timings = { ...HUB_TIMINGS, ...timings };
     this.now = now ?? (() => Date.now());
-    this.config = null;
+    // Until Gladys gives the configuration (a failing getConfig keeps this).
+    this.config = normalizeConfig();
     /** @type {Map<number, object>} decoder records, by slot */
     this.records = new Map();
     this.transports = new Map();
@@ -151,9 +157,13 @@ export class DecoderHub {
     }
     // The feature names and the channel text follow the language.
     this.gladys.forgetPublishedStates();
-    await this.publishDevices();
-    await this.pollAll();
-    this.schedulePoll();
+    try {
+      await this.publishDevices();
+      await this.pollAll();
+    } finally {
+      // A refused discovery must not stop the readings for good.
+      this.schedulePoll();
+    }
   }
 
   newRecord(decoder) {
@@ -169,6 +179,7 @@ export class DecoderHub {
       polling: null,
       queue: Promise.resolve(),
       followUpTimer: null,
+      pendingPower: null, // { on, until } after a power press
     };
   }
 
@@ -222,7 +233,12 @@ export class DecoderHub {
       buildDevice(this.gladys, record.decoder, this.config.language),
     );
     // Even an empty list: the Discovery tab then shows no stale decoder.
-    await this.gladys.publishDiscoveredDevices(devices);
+    try {
+      await this.gladys.publishDiscoveredDevices(devices);
+      this.resolved('discovery');
+    } catch (err) {
+      this.problem('discovery', `Devices refused: ${err.message}`, undefined, 'error');
+    }
   }
 
   /** "Search" in the Discovery tab: publish the devices again, read the decoders. */
@@ -327,7 +343,12 @@ export class DecoderHub {
       logger.debug(`${this.label(record)}: ${err.message} (again)`);
     }
     const previous = record.snapshot;
-    if (record.failures < this.timings.offAfterFailures || previous.state === 'off') {
+    if (record.failures < this.timings.offAfterFailures) {
+      return wasError !== err.kind;
+    }
+    if (previous.state === 'off') {
+      // Still silent: nothing changes, but the heartbeat must go on.
+      await this.publishStates(record);
       return wasError !== err.kind;
     }
     const next = { state: 'off', epgId: null, context: null };
@@ -360,16 +381,16 @@ export class DecoderHub {
     if (!isOn || !next.epgId || next.epgId === record.lastEpgId) {
       return;
     }
+    // No channel seen yet (started on the home page or in standby): the
+    // first live channel is a change too, with no previous channel.
     const before = describeChannel(record.lastEpgId);
     record.lastEpgId = next.epgId;
-    if (before) {
-      await this.fire(TRIGGERS.CHANNEL_CHANGED, record, {
-        channel: channel.number,
-        channel_name: channel.name,
-        previous_channel: before.number,
-        previous_channel_name: before.name,
-      });
-    }
+    await this.fire(TRIGGERS.CHANNEL_CHANGED, record, {
+      channel: channel.number,
+      channel_name: channel.name,
+      previous_channel: before?.number ?? null,
+      previous_channel_name: before?.name ?? null,
+    });
   }
 
   async fire(key, record, data) {
@@ -531,6 +552,9 @@ export class DecoderHub {
 
   /** Read the decoder now; throws the "does not answer" message when it is silent. */
   async freshState(record) {
+    // A reading started before the last key press may answer the old state:
+    // let it end, then read again.
+    await record.polling?.catch(() => {});
     const changed = await this.poll(record);
     await this.afterChanges(changed);
     if (record.error) {
@@ -558,6 +582,12 @@ export class DecoderHub {
     }
   }
 
+  /** Press the power toggle, remembering the state it asks for. */
+  async pressPower(record, on) {
+    await this.press(record, KEYS.power);
+    record.pendingPower = { on, until: this.now() + this.timings.powerSettleMs };
+  }
+
   /**
    * Turn a decoder on or put it in standby. Resolves with whether the power
    * key was pressed (false: it already was in that state).
@@ -565,11 +595,13 @@ export class DecoderHub {
   setPower(deviceExternalId, on) {
     const record = this.target(deviceExternalId);
     return this.exclusive(record, async () => {
-      const state = await this.freshState(record);
-      if ((state === 'on') === on) {
+      const read = await this.freshState(record);
+      const pending = record.pendingPower;
+      const isOn = pending && this.now() < pending.until ? pending.on : read === 'on';
+      if (isOn === on) {
         return false;
       }
-      await this.press(record, KEYS.power);
+      await this.pressPower(record, on);
       logger.info(`${this.label(record)}: ${on ? 'turned on' : 'put in standby'}`);
       this.scheduleFollowUp(record);
       return true;
@@ -594,7 +626,10 @@ export class DecoderHub {
         if (!wake) {
           throw new Error(pick(ACTION_TEXT.standby, language));
         }
-        await this.press(record, KEYS.power);
+        const pending = record.pendingPower;
+        if (!(pending?.on && this.now() < pending.until)) {
+          await this.pressPower(record, true);
+        }
         logger.info(`${this.label(record)}: turned on`);
         await sleep(this.timings.wakeMs);
         state = await this.freshState(record);

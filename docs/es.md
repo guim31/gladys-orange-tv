@@ -63,7 +63,7 @@ identificador en la guía de Orange), con el número 0.
 
 ### Mando
 
-El estado del decodificador y el canal en pantalla, con cuatro botones: **Encender** (o **En espera**
+El estado del decodificador y el canal en pantalla, con cuatro botones: **Encender** (o **Poner en espera**
 cuando está encendido), y después **Canal −**, **Canal +** y **Silencio** (por defecto) o **Volumen −**,
 **Volumen +** y **Silencio** (ajuste _Botones_). Gladys permite cuatro botones por widget: coloque dos
 widgets Mando uno al lado del otro para el mando completo.
@@ -83,7 +83,7 @@ espera lo enciende primero y después teclea el número.
 - **Canal cambiado**: el decodificador ha cambiado a otro canal en directo (filtro sobre un número de
   canal, vacío: cualquiera). Información transmitida: nombre del decodificador, número y nombre del canal,
   número y nombre del canal anterior. Pasar por la página de inicio y volver al mismo canal no es un
-  cambio.
+  cambio; el primer canal visto tras un arranque de la integración en la página de inicio o en espera sí lo es, sin canal anterior.
 
 Los eventos se emiten incluso para un decodificador no añadido en Gladys.
 

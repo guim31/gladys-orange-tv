@@ -82,7 +82,7 @@ puis tape le numéro.
 - **Chaîne changée** : le décodeur est passé sur une autre chaîne en direct (filtre sur un numéro de
   chaîne, vide : n'importe laquelle). Informations transmises : nom du décodeur, numéro et nom de la
   chaîne, numéro et nom de la chaîne précédente. Passer par la page d'accueil et revenir sur la même
-  chaîne n'est pas un changement.
+  chaîne n'est pas un changement ; la première chaîne vue après un démarrage de l'intégration sur la page d'accueil ou en veille en est un, sans chaîne précédente.
 
 Les événements partent même pour un décodeur non ajouté dans Gladys.
 

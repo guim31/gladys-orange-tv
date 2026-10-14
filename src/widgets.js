@@ -55,7 +55,7 @@ export const TEXT = {
   state: { en: 'Decoder', fr: 'Décodeur', de: 'Decoder', es: 'Decodificador' },
   channel: { en: 'Channel', fr: 'Chaîne', de: 'Sender', es: 'Canal' },
   turnOn: { en: 'Turn on', fr: 'Allumer', de: 'Einschalten', es: 'Encender' },
-  turnOff: { en: 'Standby', fr: 'Mettre en veille', de: 'Standby', es: 'En espera' },
+  turnOff: { en: 'Standby', fr: 'Mettre en veille', de: 'Standby', es: 'Poner en espera' },
   channelDown: { en: 'Channel −', fr: 'Chaîne −', de: 'Sender −', es: 'Canal −' },
   channelUp: { en: 'Channel +', fr: 'Chaîne +', de: 'Sender +', es: 'Canal +' },
   volumeDown: { en: 'Volume −', fr: 'Volume −', de: 'Leiser', es: 'Volumen −' },
@@ -281,8 +281,9 @@ async function actFavorites(hub, { actionKey, params = {}, settings }) {
   // The number travels with the button: the settings may have changed since.
   const number = parseChannelNumber(params.number) ?? favoriteNumbers(settings)[index];
   await hub.setChannel(settings?.device || null, number, { wake: true });
+  const channel = channelByNumber(number);
   return {
-    message: toast((text) => text.channel(favoriteLabel(number, hub.config.language))),
+    message: toast((text) => text.channel(channel ? `${number} · ${channel.name}` : number)),
   };
 }
 
