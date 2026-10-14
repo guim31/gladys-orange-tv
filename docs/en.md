@@ -1,61 +1,128 @@
-# Demo Devices Template
+# Orange TV
 
-This is the user documentation of the integration. Gladys re-hosts this file
-and shows a permanent **Documentation** link to it in the Configuration screen
-(in the user's language, with English as the fallback) — it is when
-configuring that the user needs it most. Keep the short onboarding hints in
-the `section` blocks of the manifest `config_schema`; put the long
-step-by-step (screenshots, troubleshooting…) here.
+Control and follow your **Orange TV decoder** (UHD 86, TV 4, TV 5, TV 6) from Gladys, on your local
+network: turn it on or put it in standby, see the channel on screen, change channels, raise or lower the
+volume, and react in your scenes when the TV is turned on or the channel changes.
 
-## What you get
+The integration uses the local HTTP API of the decoder (port 8080), the one the Orange TV mobile app
+uses. No account, no cloud.
 
-Six demo devices show up after installation: a weather station (real data
-from Open-Meteo), a switch, a dimmable light, a smart plug with power
-metering, a motion sensor and a camera.
+> **Developed without the hardware: feedback welcome.** The integration was built and tested against a
+> simulator faithful to the answers published by the open source projects that use this API, not
+> against a real decoder. Tell us what works and what does not on
+> [GitHub](https://github.com/guim31/gladys-orange-tv/issues) or on the Gladys forum.
+
+## Requirements
+
+- An Orange TV decoder connected to your Livebox, on the same network as Gladys.
+- Its IP address: in the Livebox interface (`http://192.168.1.1`), under the connected devices. Reserve
+  it (static DHCP lease) so it does not change.
+- Gladys 5.1.0 or later.
 
 ## Configuration
 
-1. Open the **Configuration** tab of the integration.
-2. Set the **latitude** and **longitude** the demo weather station should
-   observe (they default to Paris), and pick your temperature unit.
-   The **refresh interval** sets how often the weather station and the
-   plug's power are read: every 5 minutes by default, every minute at most.
-3. Save: the devices appear in the **Discovery** tab, ready to be added.
+In **Integrations → Orange TV → Configuration**:
 
-The **Prefer the local connection** toggle drives the demo plug: it reports
-the channel it actually uses as a badge (local or cloud), with an orange dot
-when it runs degraded (local refused, cloud fallback).
+- **IP address**: the address of the decoder, e.g. `192.168.1.20` (port 8080 by default; type
+  `192.168.1.20:8081` for another one).
+- **Name**: the name of the device in Gladys. Empty: "Orange TV" followed by the address.
+- Up to three decoders, one per section.
+- **Reading interval**: how often the decoders are read, from 5 seconds to 1 minute (10 seconds by
+  default). It is the delay before Gladys sees a channel change made with the remote.
+- **Language of the names**: language of the feature names and of the texts the integration sends.
+  Choose it before adding the devices: Gladys keeps the names given at creation.
 
-## Actions
+**Test the decoders** reads every decoder and says what it shows. Then add the devices from the
+**Discovery** tab.
 
-- **Test the weather provider** — performs a live request to Open-Meteo and
-  shows the current temperature and humidity under the button.
-- **Identify a device** — pick one of your devices in the list and it will
-  signal itself (the demo light "blinks" in the logs).
+## Devices
 
-## Scenes
+One device per decoder, with these features:
 
-The integration adds its own cards to the scene editor (Gladys 5.1 or
-later), under the **Integrations** category:
+| Feature            | What it does                                                                                                |
+| ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| **Power**          | On (1) or standby (0). A decoder that stops answering counts as off. Writable: turns the decoder on or off. |
+| **Channel number** | Number of the live channel on the remote, 0 when none. Writable: types the number on the remote.            |
+| **Channel**        | Name of the channel, or what the decoder shows: _Home page_, _Video on demand_, _Standby_, _Off_.           |
+| **Channel up**     | Button: next channel.                                                                                       |
+| **Channel down**   | Button: previous channel.                                                                                   |
+| **Volume up**      | Button: one volume step up.                                                                                 |
+| **Volume down**    | Button: one volume step down.                                                                               |
+| **Mute**           | Button: mute or unmute.                                                                                     |
+| **Play / pause**   | Button: pause live TV or a replay, and resume.                                                              |
 
-- **Motion detected** (trigger) — starts the scene when a demo motion sensor
-  sees something move. Optionally pick the sensor and what moved (person,
-  animal); left empty, any detection matches. The following actions can
-  read what moved with `{{triggerEvent.data.target}}`.
-- **Identify a device** (action) — makes the chosen device signal itself.
-  It returns whether the device could signal itself, so the following
-  actions can depend on it.
+The power key of the remote is a toggle: the integration reads the decoder first and presses it only
+when needed, so "turn off" never turns a decoder on.
 
-## Dashboard
+The channel names come from a table of the Orange line-up embedded in the integration (free channels,
+the main ones up to 40). A channel missing from it shows as `EPG <id>` (its id in the Orange guide),
+with number 0.
 
-Add the **Demo status** widget to a dashboard: it shows the live
-temperature of the weather station and the power of the office plug, the
-connection the plug currently uses (orange when degraded) and the observed
-location. Its **Identify the light** button makes the demo light signal
-itself.
+## Widgets
+
+### Remote
+
+The state of the decoder and the channel on screen, with four buttons: **Turn on** (or **Standby** when
+it is on), then either **Channel −**, **Channel +** and **Mute** (default) or **Volume −**,
+**Volume +** and **Mute** (setting _Buttons_). Gladys allows four buttons per widget: put two Remote
+widgets side by side for the whole remote.
+
+### Favorite channels
+
+Four channel buttons, numbers chosen in the widget settings (TF1, France 2, France 3 and M6 by default).
+The channel on screen carries a check mark. A tap on a decoder in standby turns it on first, then types
+the number.
+
+## Scene triggers
+
+- **Decoder turned on**: the decoder left standby. Information passed on: decoder name, channel number,
+  channel.
+- **Decoder turned off**: the decoder went to standby, or stopped answering (filter _How_). Information
+  passed on: decoder name, how (`standby` or `unreachable`).
+- **Channel changed**: the decoder switched to another live channel (filter on a channel number,
+  empty: any). Information passed on: decoder name, channel number and name, previous channel number
+  and name. Going through the home page and back to the same channel is not a change.
+
+The events fire even for a decoder not added in Gladys.
+
+## Scene actions
+
+- **Turn the decoder on or off**: presses the power key only when needed. Output: whether the key was
+  pressed.
+- **Put on a channel**: types the channel number on the remote; turns the decoder on first if it is in
+  standby (about 6 seconds). Outputs: channel number and name.
+- **Press a remote key**: OK, back, menu, TV guide, arrows, channels, volume, mute, play / pause,
+  rewind, fast forward, record, video on demand, power; up to 10 times (volume steps).
+
+Without a decoder chosen, the actions drive the first decoder of the configuration.
+
+## Scene examples
+
+- **Morning news**: at 7:00 on weekdays → _Put on a channel_ 16 (franceinfo).
+- **Movie night**: _Decoder turned on_ after 20:00 → dim the living room lights.
+- **Quiet house**: _Decoder turned off_ → turn off the TV power strip after 5 minutes.
+- **Children**: _Channel changed_ to a given number → send a message.
 
 ## Troubleshooting
 
-The integration logs everything it does: check the integration logs from the
-Gladys UI (or `docker logs` on the host) with `LOG_LEVEL=debug` for the full
-detail.
+- **"does not answer (off, or wrong address)"**: check the IP address in the Livebox; the decoder must be
+  powered. In deep standby (the energy saving mode of the decoder) it stops answering on the network:
+  it then shows as _Off_ and can only be turned on with its remote.
+- **"answers, but is not an Orange TV decoder"**: the address is another device's.
+- **The channel shows `EPG 1234`**: the channel is not in the embedded table; tell us its number and
+  name in an issue.
+- **A typed channel is wrong**: the digits are typed 0.35 s apart; tell us if your decoder needs more.
+- Logs: **Integrations → Orange TV → Logs**; set `LOG_LEVEL=debug` for every reading.
+
+## Limitations
+
+- Developed without the hardware: the reading of standby, of the home page and of the apps comes from the
+  open source projects, not from tests on a real decoder. The Orange "Clé TV" (Android TV) probably has
+  no such local API: not supported until someone confirms it does.
+- No program guide: the decoder only gives the id of the channel on screen, and the integration does not
+  call any Orange online service.
+- A decoder in deep standby cannot be woken up from the network.
+- No discovery: the IP address is typed in the configuration.
+- The local API has no password: anyone on your network can drive the decoder, with or without Gladys.
+  The integration only sends keys of the remote.
+- Not affiliated with Orange. Orange is a trademark of Orange SA.

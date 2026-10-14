@@ -1,0 +1,19 @@
+{
+  "result": {
+    "responseCode": "0",
+    "message": "ok",
+    "data": {
+      "timeShiftingState": "0",
+      "playedMediaType": "LIVE",
+      "playedMediaState": "PLAY",
+      "playedMediaId": "-1",
+      "playedMediaContextId": "1",
+      "playedMediaPosition": "NA",
+      "osdContext": "MAIN_PROCESS",
+      "macAddress": "02:00:5E:10:00:01",
+      "wolSupport": "0",
+      "friendlyName": "décodeur TV d'Orange",
+      "activeStandbyState": "1"
+    }
+  }
+}
