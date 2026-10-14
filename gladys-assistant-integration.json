@@ -1,147 +1,622 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "Orange TV",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "Orange TV decoder: power, channels and volume from Gladys, remote widget, channel scenes.",
+    "fr": "Décodeur TV d'Orange : marche, chaînes et volume depuis Gladys, widget télécommande, scènes.",
+    "de": "Orange-TV-Decoder: Ein/Aus, Sender und Lautstärke aus Gladys, Fernbedienungs-Widget, Szenen.",
+    "es": "Decodificador Orange TV: encendido, canales y volumen desde Gladys, widget mando, escenas."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-orange-tv:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-orange-tv/main/cover.png",
+  "categories": ["multimedia"],
+  "transports": ["local"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
-      "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+      "label": {
+        "en": "Your decoders",
+        "fr": "Vos décodeurs",
+        "de": "Deine Decoder",
+        "es": "Sus decodificadores"
       },
-      "links": [
+      "description": {
+        "en": "Orange TV decoder (UHD 86, TV 4, TV 5, TV 6) on the same network as Gladys. Find its IP address in your Livebox (connected devices) and reserve it so it does not change. Up to three decoders.",
+        "fr": "Décodeur TV d'Orange (UHD 86, TV 4, TV 5, TV 6) sur le même réseau que Gladys. Trouvez son adresse IP dans votre Livebox (appareils connectés) et réservez-la pour qu'elle ne change pas. Jusqu'à trois décodeurs.",
+        "de": "Orange-TV-Decoder (UHD 86, TV 4, TV 5, TV 6) im selben Netzwerk wie Gladys. Seine IP-Adresse findest du in deiner Livebox (verbundene Geräte); reserviere sie, damit sie sich nicht ändert. Bis zu drei Decoder.",
+        "es": "Decodificador Orange TV (UHD 86, TV 4, TV 5, TV 6) en la misma red que Gladys. Encuentre su dirección IP en su Livebox (dispositivos conectados) y resérvela para que no cambie. Hasta tres decodificadores."
+      }
+    },
+    {
+      "key": "decoder_1_address",
+      "type": "string",
+      "label": {
+        "en": "IP address",
+        "fr": "Adresse IP",
+        "de": "IP-Adresse",
+        "es": "Dirección IP"
+      },
+      "description": {
+        "en": "IP address of the decoder on your network (port 8080 by default).",
+        "fr": "Adresse IP du décodeur sur votre réseau (port 8080 par défaut).",
+        "de": "IP-Adresse des Decoders in deinem Netzwerk (standardmäßig Port 8080).",
+        "es": "Dirección IP del decodificador en su red (puerto 8080 por defecto)."
+      },
+      "placeholder": {
+        "en": "e.g. 192.168.1.20",
+        "fr": "ex. 192.168.1.20",
+        "de": "z. B. 192.168.1.20",
+        "es": "p. ej. 192.168.1.20"
+      },
+      "required": true,
+      "default": ""
+    },
+    {
+      "key": "decoder_1_name",
+      "type": "string",
+      "label": {
+        "en": "Name",
+        "fr": "Nom",
+        "de": "Name",
+        "es": "Nombre"
+      },
+      "description": {
+        "en": "Name of the device in Gladys. Empty: \"Orange TV\" followed by the address.",
+        "fr": "Nom de l'appareil dans Gladys. Vide : « Orange TV » suivi de l'adresse.",
+        "de": "Name des Geräts in Gladys. Leer: „Orange TV“ gefolgt von der Adresse.",
+        "es": "Nombre del dispositivo en Gladys. Vacío: «Orange TV» seguido de la dirección."
+      },
+      "placeholder": {
+        "en": "e.g. Living room TV",
+        "fr": "ex. TV du salon",
+        "de": "z. B. Fernseher Wohnzimmer",
+        "es": "p. ej. TV del salón"
+      },
+      "required": false,
+      "default": ""
+    },
+    {
+      "key": "decoder_2",
+      "type": "section",
+      "label": {
+        "en": "Second decoder (optional)",
+        "fr": "Deuxième décodeur (facultatif)",
+        "de": "Zweiter Decoder (optional)",
+        "es": "Segundo decodificador (opcional)"
+      },
+      "description": {
+        "en": "Same fields, for another Orange TV decoder of your home.",
+        "fr": "Les mêmes champs, pour un autre décodeur TV d'Orange de la maison.",
+        "de": "Dieselben Felder, für einen weiteren Orange-TV-Decoder bei dir zu Hause.",
+        "es": "Los mismos campos, para otro decodificador Orange TV de su hogar."
+      }
+    },
+    {
+      "key": "decoder_2_address",
+      "type": "string",
+      "label": {
+        "en": "IP address",
+        "fr": "Adresse IP",
+        "de": "IP-Adresse",
+        "es": "Dirección IP"
+      },
+      "description": {
+        "en": "IP address of the decoder on your network (port 8080 by default).",
+        "fr": "Adresse IP du décodeur sur votre réseau (port 8080 par défaut).",
+        "de": "IP-Adresse des Decoders in deinem Netzwerk (standardmäßig Port 8080).",
+        "es": "Dirección IP del decodificador en su red (puerto 8080 por defecto)."
+      },
+      "placeholder": {
+        "en": "e.g. 192.168.1.20",
+        "fr": "ex. 192.168.1.20",
+        "de": "z. B. 192.168.1.20",
+        "es": "p. ej. 192.168.1.20"
+      },
+      "required": false,
+      "default": ""
+    },
+    {
+      "key": "decoder_2_name",
+      "type": "string",
+      "label": {
+        "en": "Name",
+        "fr": "Nom",
+        "de": "Name",
+        "es": "Nombre"
+      },
+      "description": {
+        "en": "Name of the device in Gladys. Empty: \"Orange TV\" followed by the address.",
+        "fr": "Nom de l'appareil dans Gladys. Vide : « Orange TV » suivi de l'adresse.",
+        "de": "Name des Geräts in Gladys. Leer: „Orange TV“ gefolgt von der Adresse.",
+        "es": "Nombre del dispositivo en Gladys. Vacío: «Orange TV» seguido de la dirección."
+      },
+      "placeholder": {
+        "en": "e.g. Living room TV",
+        "fr": "ex. TV du salon",
+        "de": "z. B. Fernseher Wohnzimmer",
+        "es": "p. ej. TV del salón"
+      },
+      "required": false,
+      "default": ""
+    },
+    {
+      "key": "decoder_3",
+      "type": "section",
+      "label": {
+        "en": "Third decoder (optional)",
+        "fr": "Troisième décodeur (facultatif)",
+        "de": "Dritter Decoder (optional)",
+        "es": "Tercer decodificador (opcional)"
+      },
+      "description": {
+        "en": "Same fields, for another Orange TV decoder of your home.",
+        "fr": "Les mêmes champs, pour un autre décodeur TV d'Orange de la maison.",
+        "de": "Dieselben Felder, für einen weiteren Orange-TV-Decoder bei dir zu Hause.",
+        "es": "Los mismos campos, para otro decodificador Orange TV de su hogar."
+      }
+    },
+    {
+      "key": "decoder_3_address",
+      "type": "string",
+      "label": {
+        "en": "IP address",
+        "fr": "Adresse IP",
+        "de": "IP-Adresse",
+        "es": "Dirección IP"
+      },
+      "description": {
+        "en": "IP address of the decoder on your network (port 8080 by default).",
+        "fr": "Adresse IP du décodeur sur votre réseau (port 8080 par défaut).",
+        "de": "IP-Adresse des Decoders in deinem Netzwerk (standardmäßig Port 8080).",
+        "es": "Dirección IP del decodificador en su red (puerto 8080 por defecto)."
+      },
+      "placeholder": {
+        "en": "e.g. 192.168.1.20",
+        "fr": "ex. 192.168.1.20",
+        "de": "z. B. 192.168.1.20",
+        "es": "p. ej. 192.168.1.20"
+      },
+      "required": false,
+      "default": ""
+    },
+    {
+      "key": "decoder_3_name",
+      "type": "string",
+      "label": {
+        "en": "Name",
+        "fr": "Nom",
+        "de": "Name",
+        "es": "Nombre"
+      },
+      "description": {
+        "en": "Name of the device in Gladys. Empty: \"Orange TV\" followed by the address.",
+        "fr": "Nom de l'appareil dans Gladys. Vide : « Orange TV » suivi de l'adresse.",
+        "de": "Name des Geräts in Gladys. Leer: „Orange TV“ gefolgt von der Adresse.",
+        "es": "Nombre del dispositivo en Gladys. Vacío: «Orange TV» seguido de la dirección."
+      },
+      "placeholder": {
+        "en": "e.g. Living room TV",
+        "fr": "ex. TV du salon",
+        "de": "z. B. Fernseher Wohnzimmer",
+        "es": "p. ej. TV del salón"
+      },
+      "required": false,
+      "default": ""
+    },
+    {
+      "key": "options",
+      "type": "section",
+      "label": {
+        "en": "Options",
+        "fr": "Options",
+        "de": "Optionen",
+        "es": "Opciones"
+      }
+    },
+    {
+      "key": "poll_interval",
+      "type": "select",
+      "label": {
+        "en": "Reading interval",
+        "fr": "Intervalle de lecture",
+        "de": "Leseintervall",
+        "es": "Intervalo de lectura"
+      },
+      "description": {
+        "en": "How often the decoders are read: the delay of the channel and power updates.",
+        "fr": "Fréquence de lecture des décodeurs : le délai des mises à jour de chaîne et d'état.",
+        "de": "Wie oft die Decoder gelesen werden: die Verzögerung der Sender- und Statusänderungen.",
+        "es": "Con qué frecuencia se leen los decodificadores: el retraso de los cambios de canal y estado."
+      },
+      "required": false,
+      "default": "10",
+      "options": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "value": "5",
+          "label": {
+            "en": "5 seconds",
+            "fr": "5 secondes",
+            "de": "5 Sekunden",
+            "es": "5 segundos"
+          }
+        },
+        {
+          "value": "10",
+          "label": {
+            "en": "10 seconds",
+            "fr": "10 secondes",
+            "de": "10 Sekunden",
+            "es": "10 segundos"
+          }
+        },
+        {
+          "value": "30",
+          "label": {
+            "en": "30 seconds",
+            "fr": "30 secondes",
+            "de": "30 Sekunden",
+            "es": "30 segundos"
+          }
+        },
+        {
+          "value": "60",
+          "label": {
+            "en": "1 minute",
+            "fr": "1 minute",
+            "de": "1 Minute",
+            "es": "1 minuto"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
-    },
-    {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
-    },
-    {
-      "key": "unit",
+      "key": "language",
       "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
-      "required": false,
-      "default": "celsius",
-      "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
-      ]
-    },
-    {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "label": {
+        "en": "Language of the names",
+        "fr": "Langue des noms",
+        "de": "Sprache der Namen",
+        "es": "Idioma de los nombres"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "Language of the feature names and of the texts the integration sends (channel, scene messages).",
+        "fr": "Langue des noms de fonctionnalités et des textes envoyés par l'intégration (chaîne, messages des scènes).",
+        "de": "Sprache der Funktionsnamen und der Texte der Integration (Sender, Szenenmeldungen).",
+        "es": "Idioma de los nombres de las funciones y de los textos de la integración (canal, mensajes de escenas)."
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": "fr",
+      "options": [
+        {
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais",
+            "de": "Englisch",
+            "es": "Inglés"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français",
+            "de": "Französisch",
+            "es": "Francés"
+          }
+        },
+        {
+          "value": "de",
+          "label": {
+            "en": "German",
+            "fr": "Allemand",
+            "de": "Deutsch",
+            "es": "Alemán"
+          }
+        },
+        {
+          "value": "es",
+          "label": {
+            "en": "Spanish",
+            "fr": "Espagnol",
+            "de": "Spanisch",
+            "es": "Español"
+          }
+        }
+      ]
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
+      "key": "test_connection",
+      "label": {
+        "en": "Test the decoders",
+        "fr": "Tester les décodeurs",
+        "de": "Decoder testen",
+        "es": "Probar los decodificadores"
+      },
       "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "decoder_turned_on",
+      "label": {
+        "en": "Decoder turned on",
+        "fr": "Décodeur allumé",
+        "de": "Decoder eingeschaltet",
+        "es": "Decodificador encendido"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "An Orange TV decoder left standby.",
+        "fr": "Un décodeur TV d'Orange est sorti de veille.",
+        "de": "Ein Orange-TV-Decoder hat den Standby verlassen.",
+        "es": "Un decodificador Orange TV ha salido del modo de espera."
       },
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
+          "label": {
+            "en": "Decoder",
+            "fr": "Décodeur",
+            "de": "Decoder",
+            "es": "Decodificador"
+          },
+          "description": {
+            "en": "Empty: any decoder.",
+            "fr": "Vide : n'importe quel décodeur.",
+            "de": "Leer: jeder Decoder.",
+            "es": "Vacío: cualquier decodificador."
+          },
+          "required": false
+        }
+      ],
+      "variables": [
+        {
+          "key": "decoder",
+          "type": "string",
+          "label": {
+            "en": "Decoder name",
+            "fr": "Nom du décodeur",
+            "de": "Name des Decoders",
+            "es": "Nombre del decodificador"
+          }
         },
         {
-          "key": "target",
-          "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
+          "key": "channel",
+          "type": "number",
+          "label": {
+            "en": "Channel number",
+            "fr": "Numéro de chaîne",
+            "de": "Sendernummer",
+            "es": "Número de canal"
+          }
+        },
+        {
+          "key": "channel_name",
+          "type": "string",
+          "label": {
+            "en": "Channel",
+            "fr": "Chaîne",
+            "de": "Sender",
+            "es": "Canal"
+          }
+        }
+      ]
+    },
+    {
+      "key": "decoder_turned_off",
+      "label": {
+        "en": "Decoder turned off",
+        "fr": "Décodeur éteint",
+        "de": "Decoder ausgeschaltet",
+        "es": "Decodificador apagado"
+      },
+      "description": {
+        "en": "An Orange TV decoder went to standby, or stopped answering.",
+        "fr": "Un décodeur TV d'Orange s'est mis en veille, ou ne répond plus.",
+        "de": "Ein Orange-TV-Decoder ist in den Standby gegangen oder antwortet nicht mehr.",
+        "es": "Un decodificador Orange TV ha pasado a espera o ya no responde."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Decoder",
+            "fr": "Décodeur",
+            "de": "Decoder",
+            "es": "Decodificador"
+          },
+          "description": {
+            "en": "Empty: any decoder.",
+            "fr": "Vide : n'importe quel décodeur.",
+            "de": "Leer: jeder Decoder.",
+            "es": "Vacío: cualquier decodificador."
+          },
+          "required": false
+        },
+        {
+          "key": "reason",
+          "type": "select",
+          "label": {
+            "en": "How",
+            "fr": "Comment",
+            "de": "Wie",
+            "es": "Cómo"
+          },
           "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
+            {
+              "value": "standby",
+              "label": {
+                "en": "Standby",
+                "fr": "Mise en veille",
+                "de": "Standby",
+                "es": "Modo de espera"
+              }
+            },
+            {
+              "value": "unreachable",
+              "label": {
+                "en": "No longer answers",
+                "fr": "Ne répond plus",
+                "de": "Antwortet nicht mehr",
+                "es": "Ya no responde"
+              }
+            }
           ]
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "decoder",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Decoder name",
+            "fr": "Nom du décodeur",
+            "de": "Name des Decoders",
+            "es": "Nombre del decodificador"
+          }
+        },
+        {
+          "key": "reason",
+          "type": "string",
+          "label": {
+            "en": "How (standby, unreachable)",
+            "fr": "Comment (standby, unreachable)",
+            "de": "Wie (standby, unreachable)",
+            "es": "Cómo (standby, unreachable)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "channel_changed",
+      "label": {
+        "en": "Channel changed",
+        "fr": "Chaîne changée",
+        "de": "Sender gewechselt",
+        "es": "Canal cambiado"
+      },
+      "description": {
+        "en": "An Orange TV decoder switched to another live channel.",
+        "fr": "Un décodeur TV d'Orange est passé sur une autre chaîne en direct.",
+        "de": "Ein Orange-TV-Decoder hat auf einen anderen Live-Sender gewechselt.",
+        "es": "Un decodificador Orange TV ha cambiado a otro canal en directo."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Decoder",
+            "fr": "Décodeur",
+            "de": "Decoder",
+            "es": "Decodificador"
+          },
+          "description": {
+            "en": "Empty: any decoder.",
+            "fr": "Vide : n'importe quel décodeur.",
+            "de": "Leer: jeder Decoder.",
+            "es": "Vacío: cualquier decodificador."
+          },
+          "required": false
+        },
+        {
+          "key": "channel",
+          "type": "number",
+          "label": {
+            "en": "Channel number",
+            "fr": "Numéro de chaîne",
+            "de": "Sendernummer",
+            "es": "Número de canal"
+          },
+          "min": 1,
+          "max": 9999,
+          "description": {
+            "en": "Empty: any channel.",
+            "fr": "Vide : n'importe quelle chaîne.",
+            "de": "Leer: jeder Sender.",
+            "es": "Vacío: cualquier canal."
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "decoder",
+          "type": "string",
+          "label": {
+            "en": "Decoder name",
+            "fr": "Nom du décodeur",
+            "de": "Name des Decoders",
+            "es": "Nombre del decodificador"
+          }
+        },
+        {
+          "key": "channel",
+          "type": "number",
+          "label": {
+            "en": "Channel number",
+            "fr": "Numéro de chaîne",
+            "de": "Sendernummer",
+            "es": "Número de canal"
+          }
+        },
+        {
+          "key": "channel_name",
+          "type": "string",
+          "label": {
+            "en": "Channel",
+            "fr": "Chaîne",
+            "de": "Sender",
+            "es": "Canal"
+          }
+        },
+        {
+          "key": "previous_channel",
+          "type": "number",
+          "label": {
+            "en": "Previous channel number",
+            "fr": "Numéro de la chaîne précédente",
+            "de": "Nummer des vorherigen Senders",
+            "es": "Número del canal anterior"
+          }
+        },
+        {
+          "key": "previous_channel_name",
+          "type": "string",
+          "label": {
+            "en": "Previous channel",
+            "fr": "Chaîne précédente",
+            "de": "Vorheriger Sender",
+            "es": "Canal anterior"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
+      "key": "set_power",
+      "label": {
+        "en": "Turn the decoder on or off",
+        "fr": "Allumer ou éteindre le décodeur",
+        "de": "Decoder ein- oder ausschalten",
+        "es": "Encender o apagar el decodificador"
+      },
       "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+        "en": "Presses the power key only when needed: turning off never turns on.",
+        "fr": "N'appuie sur la touche marche que si besoin : éteindre ne rallume jamais.",
+        "de": "Drückt die Ein-Taste nur bei Bedarf: Ausschalten schaltet nie ein.",
+        "es": "Pulsa la tecla de encendido solo si hace falta: apagar nunca enciende."
       },
       "timeout_seconds": 15,
       "fields": [
@@ -149,29 +624,572 @@
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
+          "label": {
+            "en": "Decoder",
+            "fr": "Décodeur",
+            "de": "Decoder",
+            "es": "Decodificador"
+          },
+          "description": {
+            "en": "Empty: the first decoder of the configuration.",
+            "fr": "Vide : le premier décodeur de la configuration.",
+            "de": "Leer: der erste Decoder der Konfiguration.",
+            "es": "Vacío: el primer decodificador de la configuración."
+          },
+          "required": false
+        },
+        {
+          "key": "state",
+          "type": "select",
+          "label": {
+            "en": "Action",
+            "fr": "Action",
+            "de": "Aktion",
+            "es": "Acción"
+          },
+          "required": true,
+          "default": "on",
+          "options": [
+            {
+              "value": "on",
+              "label": {
+                "en": "Turn on",
+                "fr": "Allumer",
+                "de": "Einschalten",
+                "es": "Encender"
+              }
+            },
+            {
+              "value": "off",
+              "label": {
+                "en": "Standby",
+                "fr": "Mettre en veille",
+                "de": "Standby",
+                "es": "Poner en espera"
+              }
+            }
+          ]
         }
       ],
       "outputs": [
         {
-          "key": "signalled",
+          "key": "changed",
           "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "label": {
+            "en": "Power key pressed",
+            "fr": "Touche marche appuyée",
+            "de": "Ein-Taste gedrückt",
+            "es": "Tecla de encendido pulsada"
+          }
+        }
+      ]
+    },
+    {
+      "key": "set_channel",
+      "label": {
+        "en": "Put on a channel",
+        "fr": "Mettre une chaîne",
+        "de": "Sender wählen",
+        "es": "Poner un canal"
+      },
+      "description": {
+        "en": "Types the channel number on the remote; turns the decoder on first if in standby.",
+        "fr": "Tape le numéro de la chaîne sur la télécommande ; allume d'abord le décodeur s'il est en veille.",
+        "de": "Tippt die Sendernummer auf der Fernbedienung; schaltet den Decoder vorher ein, falls im Standby.",
+        "es": "Teclea el número del canal en el mando; enciende antes el decodificador si está en espera."
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Decoder",
+            "fr": "Décodeur",
+            "de": "Decoder",
+            "es": "Decodificador"
+          },
+          "description": {
+            "en": "Empty: the first decoder of the configuration.",
+            "fr": "Vide : le premier décodeur de la configuration.",
+            "de": "Leer: der erste Decoder der Konfiguration.",
+            "es": "Vacío: el primer decodificador de la configuración."
+          },
+          "required": false
+        },
+        {
+          "key": "channel",
+          "type": "number",
+          "label": {
+            "en": "Channel number",
+            "fr": "Numéro de chaîne",
+            "de": "Sendernummer",
+            "es": "Número de canal"
+          },
+          "min": 1,
+          "max": 9999,
+          "required": true,
+          "default": 1
+        }
+      ],
+      "outputs": [
+        {
+          "key": "channel",
+          "type": "number",
+          "label": {
+            "en": "Channel number",
+            "fr": "Numéro de chaîne",
+            "de": "Sendernummer",
+            "es": "Número de canal"
+          }
+        },
+        {
+          "key": "channel_name",
+          "type": "string",
+          "label": {
+            "en": "Channel",
+            "fr": "Chaîne",
+            "de": "Sender",
+            "es": "Canal"
+          }
+        }
+      ]
+    },
+    {
+      "key": "send_key",
+      "label": {
+        "en": "Press a remote key",
+        "fr": "Appuyer sur une touche",
+        "de": "Taste drücken",
+        "es": "Pulsar una tecla"
+      },
+      "description": {
+        "en": "Presses a key of the remote, once or several times (volume steps).",
+        "fr": "Appuie sur une touche de la télécommande, une ou plusieurs fois (crans de volume).",
+        "de": "Drückt eine Taste der Fernbedienung, einmal oder mehrmals (Lautstärkestufen).",
+        "es": "Pulsa una tecla del mando, una o varias veces (pasos de volumen)."
+      },
+      "timeout_seconds": 20,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Decoder",
+            "fr": "Décodeur",
+            "de": "Decoder",
+            "es": "Decodificador"
+          },
+          "description": {
+            "en": "Empty: the first decoder of the configuration.",
+            "fr": "Vide : le premier décodeur de la configuration.",
+            "de": "Leer: der erste Decoder der Konfiguration.",
+            "es": "Vacío: el primer decodificador de la configuración."
+          },
+          "required": false
+        },
+        {
+          "key": "key",
+          "type": "select",
+          "label": {
+            "en": "Key",
+            "fr": "Touche",
+            "de": "Taste",
+            "es": "Tecla"
+          },
+          "required": true,
+          "default": "ok",
+          "options": [
+            {
+              "value": "power",
+              "label": {
+                "en": "Power (on / standby)",
+                "fr": "Marche / veille",
+                "de": "Ein / Standby",
+                "es": "Encendido / espera"
+              }
+            },
+            {
+              "value": "ok",
+              "label": {
+                "en": "OK",
+                "fr": "OK",
+                "de": "OK",
+                "es": "OK"
+              }
+            },
+            {
+              "value": "back",
+              "label": {
+                "en": "Back",
+                "fr": "Retour",
+                "de": "Zurück",
+                "es": "Atrás"
+              }
+            },
+            {
+              "value": "menu",
+              "label": {
+                "en": "Menu",
+                "fr": "Menu",
+                "de": "Menü",
+                "es": "Menú"
+              }
+            },
+            {
+              "value": "guide",
+              "label": {
+                "en": "TV guide",
+                "fr": "Guide TV",
+                "de": "TV-Programm",
+                "es": "Guía de TV"
+              }
+            },
+            {
+              "value": "up",
+              "label": {
+                "en": "Up",
+                "fr": "Haut",
+                "de": "Hoch",
+                "es": "Arriba"
+              }
+            },
+            {
+              "value": "down",
+              "label": {
+                "en": "Down",
+                "fr": "Bas",
+                "de": "Runter",
+                "es": "Abajo"
+              }
+            },
+            {
+              "value": "left",
+              "label": {
+                "en": "Left",
+                "fr": "Gauche",
+                "de": "Links",
+                "es": "Izquierda"
+              }
+            },
+            {
+              "value": "right",
+              "label": {
+                "en": "Right",
+                "fr": "Droite",
+                "de": "Rechts",
+                "es": "Derecha"
+              }
+            },
+            {
+              "value": "channel_up",
+              "label": {
+                "en": "Channel up",
+                "fr": "Chaîne suivante",
+                "de": "Nächster Sender",
+                "es": "Canal siguiente"
+              }
+            },
+            {
+              "value": "channel_down",
+              "label": {
+                "en": "Channel down",
+                "fr": "Chaîne précédente",
+                "de": "Vorheriger Sender",
+                "es": "Canal anterior"
+              }
+            },
+            {
+              "value": "volume_up",
+              "label": {
+                "en": "Volume up",
+                "fr": "Monter le volume",
+                "de": "Lauter",
+                "es": "Subir volumen"
+              }
+            },
+            {
+              "value": "volume_down",
+              "label": {
+                "en": "Volume down",
+                "fr": "Baisser le volume",
+                "de": "Leiser",
+                "es": "Bajar volumen"
+              }
+            },
+            {
+              "value": "mute",
+              "label": {
+                "en": "Mute",
+                "fr": "Muet",
+                "de": "Stumm",
+                "es": "Silencio"
+              }
+            },
+            {
+              "value": "play_pause",
+              "label": {
+                "en": "Play / pause",
+                "fr": "Lecture / pause",
+                "de": "Wiedergabe / Pause",
+                "es": "Reproducir / pausa"
+              }
+            },
+            {
+              "value": "rewind",
+              "label": {
+                "en": "Rewind",
+                "fr": "Retour rapide",
+                "de": "Zurückspulen",
+                "es": "Retroceder"
+              }
+            },
+            {
+              "value": "forward",
+              "label": {
+                "en": "Fast forward",
+                "fr": "Avance rapide",
+                "de": "Vorspulen",
+                "es": "Avance rápido"
+              }
+            },
+            {
+              "value": "record",
+              "label": {
+                "en": "Record",
+                "fr": "Enregistrer",
+                "de": "Aufnehmen",
+                "es": "Grabar"
+              }
+            },
+            {
+              "value": "vod",
+              "label": {
+                "en": "Video on demand",
+                "fr": "Vidéo à la demande",
+                "de": "Video auf Abruf",
+                "es": "Vídeo a la carta"
+              }
+            }
+          ]
+        },
+        {
+          "key": "repeat",
+          "type": "number",
+          "label": {
+            "en": "Times",
+            "fr": "Nombre de fois",
+            "de": "Wie oft",
+            "es": "Veces"
+          },
+          "required": false,
+          "default": 1,
+          "min": 1,
+          "max": 10
+        }
+      ],
+      "outputs": [
+        {
+          "key": "sent",
+          "type": "number",
+          "label": {
+            "en": "Presses sent",
+            "fr": "Appuis envoyés",
+            "de": "Gesendete Tastendrücke",
+            "es": "Pulsaciones enviadas"
+          }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "remote",
+      "label": {
+        "en": "Remote",
+        "fr": "Télécommande",
+        "de": "Fernbedienung",
+        "es": "Mando"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "Decoder state and channel, power, channel or volume buttons, mute.",
+        "fr": "État et chaîne du décodeur, marche, boutons chaîne ou volume, muet.",
+        "de": "Status und Sender des Decoders, Ein/Aus, Sender- oder Lautstärketasten, stumm.",
+        "es": "Estado y canal del decodificador, encendido, botones de canal o volumen, silencio."
+      },
+      "icon": "tv",
+      "action_timeout_seconds": 15,
+      "settings": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Decoder",
+            "fr": "Décodeur",
+            "de": "Decoder",
+            "es": "Decodificador"
+          },
+          "description": {
+            "en": "Empty: the first decoder of the configuration.",
+            "fr": "Vide : le premier décodeur de la configuration.",
+            "de": "Leer: der erste Decoder der Konfiguration.",
+            "es": "Vacío: el primer decodificador de la configuración."
+          },
+          "required": false
+        },
+        {
+          "key": "buttons",
+          "type": "select",
+          "label": {
+            "en": "Buttons",
+            "fr": "Boutons",
+            "de": "Tasten",
+            "es": "Botones"
+          },
+          "required": false,
+          "default": "channels",
+          "options": [
+            {
+              "value": "channels",
+              "label": {
+                "en": "Channel − / +, mute",
+                "fr": "Chaîne − / +, muet",
+                "de": "Sender − / +, stumm",
+                "es": "Canal − / +, silencio"
+              }
+            },
+            {
+              "value": "volume",
+              "label": {
+                "en": "Volume − / +, mute",
+                "fr": "Volume − / +, muet",
+                "de": "Lautstärke − / +, stumm",
+                "es": "Volumen − / +, silencio"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "favorites",
+      "label": {
+        "en": "Favorite channels",
+        "fr": "Chaînes favorites",
+        "de": "Lieblingssender",
+        "es": "Canales favoritos"
+      },
+      "description": {
+        "en": "Four channel buttons of your choice; turns the decoder on if needed.",
+        "fr": "Quatre boutons de chaînes au choix ; allume le décodeur si besoin.",
+        "de": "Vier Sendertasten deiner Wahl; schaltet den Decoder bei Bedarf ein.",
+        "es": "Cuatro botones de canales a elegir; enciende el decodificador si hace falta."
+      },
+      "icon": "star",
+      "action_timeout_seconds": 30,
+      "settings": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Decoder",
+            "fr": "Décodeur",
+            "de": "Decoder",
+            "es": "Decodificador"
+          },
+          "description": {
+            "en": "Empty: the first decoder of the configuration.",
+            "fr": "Vide : le premier décodeur de la configuration.",
+            "de": "Leer: der erste Decoder der Konfiguration.",
+            "es": "Vacío: el primer decodificador de la configuración."
+          },
+          "required": false
+        },
+        {
+          "key": "channel_1",
+          "type": "number",
+          "label": {
+            "en": "Favorite 1",
+            "fr": "Favorite 1",
+            "de": "Favorit 1",
+            "es": "Favorito 1"
+          },
+          "description": {
+            "en": "Channel number on the remote.",
+            "fr": "Numéro de la chaîne sur la télécommande.",
+            "de": "Sendernummer auf der Fernbedienung.",
+            "es": "Número del canal en el mando."
+          },
+          "required": false,
+          "default": 1,
+          "min": 1,
+          "max": 9999
+        },
+        {
+          "key": "channel_2",
+          "type": "number",
+          "label": {
+            "en": "Favorite 2",
+            "fr": "Favorite 2",
+            "de": "Favorit 2",
+            "es": "Favorito 2"
+          },
+          "description": {
+            "en": "Channel number on the remote.",
+            "fr": "Numéro de la chaîne sur la télécommande.",
+            "de": "Sendernummer auf der Fernbedienung.",
+            "es": "Número del canal en el mando."
+          },
+          "required": false,
+          "default": 2,
+          "min": 1,
+          "max": 9999
+        },
+        {
+          "key": "channel_3",
+          "type": "number",
+          "label": {
+            "en": "Favorite 3",
+            "fr": "Favorite 3",
+            "de": "Favorit 3",
+            "es": "Favorito 3"
+          },
+          "description": {
+            "en": "Channel number on the remote.",
+            "fr": "Numéro de la chaîne sur la télécommande.",
+            "de": "Sendernummer auf der Fernbedienung.",
+            "es": "Número del canal en el mando."
+          },
+          "required": false,
+          "default": 3,
+          "min": 1,
+          "max": 9999
+        },
+        {
+          "key": "channel_4",
+          "type": "number",
+          "label": {
+            "en": "Favorite 4",
+            "fr": "Favorite 4",
+            "de": "Favorit 4",
+            "es": "Favorito 4"
+          },
+          "description": {
+            "en": "Channel number on the remote.",
+            "fr": "Numéro de la chaîne sur la télécommande.",
+            "de": "Sendernummer auf der Fernbedienung.",
+            "es": "Número del canal en el mando."
+          },
+          "required": false,
+          "default": 6,
+          "min": 1,
+          "max": 9999
+        }
+      ]
     }
   ]
 }

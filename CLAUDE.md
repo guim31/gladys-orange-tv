@@ -16,8 +16,8 @@ its only runtime dependency. It started from the official JavaScript template.
 ```bash
 npm install
 npm test                                  # node --test, the built-in runner
-node --test test/devices.test.js          # one file
-node --test --test-name-pattern "plug"    # tests whose name matches
+node --test test/hub.test.js              # one file
+node --test --test-name-pattern "channel" # tests whose name matches
 npm run lint                              # ESLint
 npm run format:check                      # Prettier, as the CI runs it
 npm run format                            # Prettier, fix in place
@@ -32,15 +32,20 @@ pushing.
 
 ```
 index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
+src/app.js                        registers every SDK handler on the hub (tests drive the same wiring)
+src/hub.js                        decoder records: reading timer, states, scene events, commands
+src/devices.js                    discovery payload of a decoder, feature keys and names, states
+src/decoder/client.js             local API client (operation 10 state, 01 keys), key codes, errors
+src/decoder/http.js               the one HTTP GET (fetch + timeout), replaced in the tests
+src/decoder/model.js              operation 10 answer -> state, EPG id -> channel
+src/channels.js                   embedded Orange line-up (number, EPG id, name)
 src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+src/widgets.js                    dashboard widgets `remote` and `favorites`
+src/texts.js                      the four-language messages of the container
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
 gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
-test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys (en and fr mandatory)
+test/                             node --test, against the SDK's fake Gladys and fake decoders
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -70,8 +75,10 @@ test/                             node --test, against the SDK's fake Gladys (in
   `type: "provider"`: 5.1.0). `test/manifest.test.js` ties the manifest to the
   code (defaults, action, scene and widget handlers): change both sides
   together.
-- **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+- **User-facing text** exists in English, French, German ("du") and Spanish
+  ("usted"): action messages, widget contents, feature names, manifest texts,
+  and `docs/{en,fr,de,es}.md` with the same sections. `test/i18n.test.js`
+  checks it.
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
   in English. Tests never touch the network.
 
@@ -233,3 +240,27 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+## Décodeur TV d'Orange (cette intégration)
+
+- **API locale** `http://<ip>:8080/remoteControl/cmd` : `operation=10` (état : `activeStandbyState`
+  "0" allumé, "1" veille ; `playedMediaId` = EPG id de la chaîne en direct, "-1" sinon ;
+  `osdContext` : LIVE, HOMEPAGE, VOD, NETFLIX…), `operation=01&key=K&mode=0` (touche ; mode 1 appui
+  long, 2 relâché, inutilisés). Réponse `{ result: { responseCode: "0", message, data } }`, un autre
+  `responseCode` est un refus. Pas d'authentification. `operation=09&epg_id=<id sur 10 car., complété
+par *>&uui=1` change de chaîne par EPG id : **non utilisé**, on tape les chiffres (512 + chiffre) pour
+  suivre la numérotation de l'abonné (chaînes régionales, renumérotations).
+- **La touche marche (116) bascule** : toujours relire l'état avant d'appuyer (`setPower`), sinon une
+  scène « éteindre » rallume une TV déjà éteinte.
+- **Veille profonde** : le décodeur ne répond plus du tout (pas de HTTP, `wolSupport` "0" dans les
+  captures) ; deux lectures muettes de suite = « éteint » (`reason: unreachable`). Un décodeur qui a déjà
+  répondu ne met pas l'intégration en erreur quand il se tait.
+- **Plafond de 4 boutons par widget** : la télécommande est coupée en deux widgets (`remote` avec réglage
+  `buttons` chaînes/volume, `favorites`). Les boutons poussoirs `television/*` (volume-up, channel-up…)
+  sont rendus comme boutons par le front depuis 5.1 (`TelevisionPushButtonFeatureTypes`).
+- `television/channel` est un champ numérique modifiable dans le front (`NumberDeviceFeature`) : écrire
+  un numéro tape les chiffres ; 0 = aucune chaîne ou chaîne inconnue de la table.
+- Table des chaînes (`src/channels.js`) reprise des faits publiés par AkA57/liveboxtvuhd (dépôt **sans
+  licence** : faits seulement, aucun code copié). Une chaîne inconnue s'affiche `EPG <id>`.
+- Rien n'a été vérifié sur un vrai décodeur : délai entre chiffres (350 ms), temps de sortie de veille
+  (6 s), valeurs de `osdContext` hors LIVE, comportement de la « Clé TV ». À confirmer par les retours.
