@@ -1,6 +1,6 @@
 {
   "name": "gladys-orange-tv",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Gladys Assistant integration for the Orange TV decoder (local HTTP API): power, channels, volume, remote widget, scene triggers and actions.",
   "type": "module",
