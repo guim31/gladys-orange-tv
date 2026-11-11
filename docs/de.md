@@ -19,7 +19,7 @@ verwendet. Kein Konto, keine Cloud.
 - Ein Orange-TV-Decoder an deiner Livebox, im selben Netzwerk wie Gladys.
 - Seine IP-Adresse: in der Oberfläche der Livebox (`http://192.168.1.1`) unter den verbundenen Geräten.
   Reserviere sie (statische DHCP-Zuweisung), damit sie sich nicht ändert.
-- Gladys 5.1.0 oder neuer.
+- Gladys 5.3.0 oder neuer.
 
 ## Konfiguration
 

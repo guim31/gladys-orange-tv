@@ -17,7 +17,7 @@ d'Orange. Pas de compte, pas de cloud.
 - Un décodeur TV d'Orange relié à votre Livebox, sur le même réseau que Gladys.
 - Son adresse IP : dans l'interface de la Livebox (`http://192.168.1.1`), parmi les appareils connectés.
   Réservez-la (bail DHCP statique) pour qu'elle ne change pas.
-- Gladys 5.1.0 ou plus récent.
+- Gladys 5.3.0 ou plus récent.
 
 ## Configuration
 
