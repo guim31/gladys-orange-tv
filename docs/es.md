@@ -18,7 +18,7 @@ de Orange TV. Sin cuenta, sin nube.
 - Un decodificador Orange TV conectado a su Livebox, en la misma red que Gladys.
 - Su dirección IP: en la interfaz de la Livebox (`http://192.168.1.1`), entre los dispositivos
   conectados. Resérvela (concesión DHCP estática) para que no cambie.
-- Gladys 5.1.0 o posterior.
+- Gladys 5.3.0 o posterior.
 
 ## Configuración
 

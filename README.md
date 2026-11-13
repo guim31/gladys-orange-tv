@@ -25,7 +25,7 @@ channels, volume, a remote widget, scene triggers and scene actions. Local only:
 
 ## Requirements
 
-- Gladys Assistant **5.1.0** or later.
+- Gladys Assistant **5.3.0** or later.
 - An Orange TV decoder on the same network as Gladys, with a fixed IP address (a DHCP reservation in the
   Livebox).
 

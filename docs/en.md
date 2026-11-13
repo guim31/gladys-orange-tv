@@ -17,7 +17,7 @@ uses. No account, no cloud.
 - An Orange TV decoder connected to your Livebox, on the same network as Gladys.
 - Its IP address: in the Livebox interface (`http://192.168.1.1`), under the connected devices. Reserve
   it (static DHCP lease) so it does not change.
-- Gladys 5.1.0 or later.
+- Gladys 5.3.0 or later.
 
 ## Configuration
 
